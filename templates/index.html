@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensure proper scaling on mobile devices -->
+    <title>TREAT</title> <!-- Page title -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- Link to external stylesheet -->
+
+    <!-- Favicon and Apple Touch Icons -->
+ <link rel="apple-touch-icon" sizes="180x180" href="./static/images/apple-touch-icon.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="./static/images/favicon-32x32.png">
+ <link rel="icon" type="image/png" sizes="16x16" href="./static/images/favicon-16x16.png">
+ <link rel="manifest" href="./static/images/site.webmanifest">
+
+</head>
+<body>
+    <div class="choco-container"> <!-- Main container with chocolate theme -->
+        <header class="header"> <!-- Header section -->
+            <h1>TREAT</h1> <!-- Main heading -->
+            <p> <!-- Subheading with acronym explanation -->
+                <span class="highlight">T</span>rigger 
+                <span class="highlight">R</span>ecognition for 
+                <span class="highlight">E</span>njoyable and 
+                <span class="highlight">A</span>ppropriate 
+                <span class="highlight">T</span>elevision
+            </p>
+        </header>
+        <main class="main-content"> <!-- Main content section -->
+            <form id="text-form" method="POST" class="sweet-form"> <!-- Form for text input -->
+                <textarea id="text-input" name="text" rows="20" placeholder="Enter your text or script here..."></textarea> <!-- Textarea for user input -->
+                <button type="submit">Analyze Script</button> <!-- Submit button -->
+            </form>
+            <div id="loading-bar" class="loading-bar"></div> <!-- Loading bar displayed during analysis -->
+            <div id="results"></div> <!-- Div to display results -->
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script> <!-- Link to external JavaScript file -->
+</body>
+</html>
