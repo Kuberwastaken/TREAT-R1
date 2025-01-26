@@ -154,7 +154,7 @@ overlap = 128           # Context preservation between chunks
 ```python
 # In model.generate() parameters
 {
-    "temperature": 0.2,          # Range: 0.1 (strict) - 1.0 (creative)
+    "temperature": 0.2,          # Range: 0.1 (strict) - 9.0 (creative)
     "top_p": 0.9,                # Range: 0.8 (focused) - 1.0 (diverse)
     "repetition_penalty": 1.05   # Range: 1.0 (none) - 2.0 (strict)
 }
