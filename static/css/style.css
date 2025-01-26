@@ -1,12 +1,12 @@
-/* Chocolate and sweets theme for TREAT */
+/* Dark and futuristic theme for TREAT */
 
 /* Set up the main styles for the body of the document */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* font */
     margin: 0; /* Remove default margin */
     padding: 0; /* Remove default padding */
-    background-color: #836853; /* Background color resembling chocolate */
-    color: #FFFFFF; /* White text color for contrast */
+    background-color: #121212; /* Dark background for futuristic look */
+    color: #e0e0e0; /* Light gray text color */
     height: 100vh; /* Full viewport height */
     display: flex; /* Flexbox layout for centering content */
     flex-direction: column; /* Column layout */
@@ -17,19 +17,20 @@ body {
 
 /* Style the container for the main content */
 .choco-container {
-    background: rgba(78, 52, 46, 0.9); /* Semi-transparent dark chocolate background */
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* Soft shadow effect */
+    background: rgba(26, 29, 33, 0.9); /* Semi-transparent dark background */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6); /* Soft shadow effect */
     border-radius: 20px; /* Rounded corners */
     padding: 40px; /* Padding inside the container */
     width: 90%; /* 90% width of the viewport */
-    max-width: 1000px; /* Maximum width */
-    height: 80%; /* 80% height of the viewport */
+    max-width: 900px; /* Maximum width */
+    height: auto; /* Adjust height automatically */
     animation: fadeIn 1s ease-in-out; /* Fade-in animation */
-    border: 1px solid #5d4037; /* Slightly lighter chocolate border */
+    border: 1px solid #333; /* Slightly lighter border */
     display: flex; /* Flexbox layout for centering content */
     flex-direction: column; /* Column layout */
     align-items: center; /* Center content horizontally */
     justify-content: center; /* Center content vertically */
+    overflow: hidden; /* Prevent overflow */
 }
 
 /* Define the fade-in animation for the container */
@@ -53,13 +54,21 @@ body {
 /* Style the main heading */
 .header h1 {
     font-size: 3rem; /* Large font size */
-    color: #d7ccc8; /* Light creamy color */
+    color: #a2a2a2; /* Light gray color */
+    letter-spacing: 2px; /* Slight letter spacing for a more futuristic feel */
+    transition: all 0.3s ease;
+}
+
+/* Subtle hover animation for the title */
+.header h1:hover {
+    color: #ff6f61; /* Subtle cyberpunk accent color */
+    transform: scale(1.05); /* Slight scale on hover */
 }
 
 /* Style the paragraph under the heading */
 .header p {
     font-size: 1.5rem; /* Medium font size */
-    color: #ffab91; /* Candy-like color */
+    color: #ffab91; /* Soft candy-like color */
 }
 
 /* Highlight certain text */
@@ -85,6 +94,7 @@ body {
     flex-direction: column; /* Column layout */
     align-items: center; /* Center content horizontally */
     justify-content: center; /* Center content vertically */
+    position: relative; /* Ensure proper positioning */
 }
 
 /* Style the textarea element */
@@ -96,10 +106,15 @@ textarea {
     border: none; /* Remove default border */
     border-radius: 10px; /* Rounded corners */
     resize: none; /* Disable resizing */
-    background: #3e2723; /* Chocolate color background */
-    color: #ffecb3; /* Creamy color text */
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); /* Inset shadow */
+    background: #2c2f36; /* Dark gray background */
+    color: #e0e0e0; /* Light text color */
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5); /* Inset shadow */
     transition: all 0.3s ease-in-out; /* Smooth transition for all properties */
+}
+
+/* Subtle hover effect for the textarea */
+textarea:hover {
+    box-shadow: inset 0 0 20px rgba(255, 165, 0, 0.3); /* Glow effect */
 }
 
 /* Style the textarea when it is focused */
@@ -114,40 +129,20 @@ button {
     padding: 20px; /* Padding inside the button */
     font-size: 1.5rem; /* Large font size */
     margin-top: 20px; /* Margin above the button */
-    background: linear-gradient(45deg, #8d6e63, #d7ccc8); /* Chocolate gradient background */
+    background: linear-gradient(45deg, #4e4e4e, #2c2f36); /* Subtle gradient background */
     color: white; /* White text color */
     border: none; /* Remove default border */
     border-radius: 10px; /* Rounded corners */
     cursor: pointer; /* Pointer cursor on hover */
     text-transform: uppercase; /* Uppercase text */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Soft shadow */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Soft shadow */
     transition: all 0.3s ease; /* Smooth transition for all properties */
-    position: relative; /* Relative positioning for overlay effects */
 }
 
-/* Style the button on hover */
+/* Subtle hover animation for the button */
 button:hover {
-    background: linear-gradient(45deg, #d7ccc8, #8d6e63); /* Reversed gradient on hover */
+    background: linear-gradient(45deg, #2c2f36, #4e4e4e); /* Reversed gradient on hover */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); /* Stronger shadow on hover */
-}
-
-/* Create an overlay effect for the button */
-button::after {
-    content: ''; /* Empty content */
-    position: absolute; /* Absolute positioning */
-    top: 0; /* Position at the top */
-    left: 0; /* Position at the left */
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    background: rgba(255, 255, 255, 0.1); /* Light overlay */
-    border-radius: 10px; /* Rounded corners */
-    opacity: 0; /* Initially hidden */
-    transition: opacity 0.3s ease; /* Smooth transition for opacity */
-}
-
-/* Show the overlay effect on hover */
-button:hover::after {
-    opacity: 1; /* Show overlay on hover */
 }
 
 /* Style the loading bar element */
@@ -155,7 +150,7 @@ button:hover::after {
     display: none; /* Initially hidden */
     width: 100%; /* Full width */
     height: 5px; /* Fixed height */
-    background: linear-gradient(90deg, #8d6e63, #d7ccc8); /* Chocolate gradient background */
+    background: linear-gradient(90deg, #4e4e4e, #2c2f36); /* Subtle gradient background */
     margin-top: 20px; /* Margin above the loading bar */
     border-radius: 2px; /* Slightly rounded corners */
     overflow: hidden; /* Hide overflow content */
@@ -188,7 +183,6 @@ button:hover::after {
 /* Style the results container */
 #results {
     overflow-x: auto; /* Add horizontal scrollbar only if needed */
-    overflow-y: hidden; /* Hide vertical overflow */
     margin-top: 30px; /* Margin above the results */
     color: #ff7043; /* Sweet orange color */
     font-size: 1.5rem; /* Large font size */
@@ -209,14 +203,12 @@ button:hover::after {
 
 /* Style the scrollbar thumb */
 #results::-webkit-scrollbar-thumb {
-    background: linear-gradient(45deg, #8d6e63, #d7ccc8); /* Chocolate gradient for scrollbar thumb */
+    background: linear-gradient(45deg, #4e4e4e, #2c2f36); /* Gradient for scrollbar thumb */
     border-radius: 5px; /* Rounded corners */
 }
 
 /* Style the scrollbar track */
 #results::-webkit-scrollbar-track {
-    background: rgba(78, 52, 46, 0.5); /* Lighter chocolate track */
+    background: rgba(26, 29, 33, 0.5); /* Lighter dark track */
     border-radius: 5px;
 }
-
-/* To Fix: Title moving upwards when Output is shown*/
