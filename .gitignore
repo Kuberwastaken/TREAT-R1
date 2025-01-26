@@ -4,8 +4,5 @@ treat-r1/
 # Ignore __pycache__ folders
 __pycache__/
 
-# Yes, I managed to Mispell treat
-tret-llama
-
 # vscode_folder
 .vscode

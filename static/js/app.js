@@ -26,10 +26,13 @@ document.getElementById('text-form').addEventListener('submit', async function(e
         // Parse the JSON response from the server
         const result = await response.json();
         if (result.error) {
-            resultsDiv.innerHTML = '<span>Error:</span> Unable to analyze text.'; // Display an error message in the results div
+            resultsDiv.innerHTML = '<span>Error:</span> Unable to analyze text.';
         } else {
-            const resultsHtml = result.results.map(r => `<div>${r.category}: ${r.confidence}</div>`).join('');
-            resultsDiv.innerHTML = `<span>Triggers:</span> ${resultsHtml}`; // Display the triggers in the results div
+            const resultsHtml = result.results
+                .filter(r => r.confidence > 0)
+                .map(r => `${r.category}`)
+                .join(' • ');
+            resultsDiv.innerHTML = `<span>Triggers Found:</span> ${resultsHtml || 'No triggers detected'}`;
         }
     } catch (error) {
         // Handle any errors that occurred during the request

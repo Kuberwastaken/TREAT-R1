@@ -1,136 +1,173 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import re
-from datetime import datetime
 import time
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def extract_answers(raw_answer, expected_order):
-    """Robust parser with duplicate handling"""
-    # Remove duplicate lines and normalize
-    seen = set()
-    clean_lines = []
-    for line in raw_answer.split("\n"):
-        normalized = line.upper().strip()
-        if normalized and normalized not in seen:
-            seen.add(normalized)
-            clean_lines.append(normalized)
-    
-    clean_text = " ".join(clean_lines)
-    
-    category_map = {cat.upper().replace("_", " "): cat for cat in expected_order}
-    
-    # Strict pattern matching
-    pattern = r"\b({})\b\s*[:=]\s*\[?(YES|NO|MAYBE|Y|N|M)\]?".format("|".join(category_map.keys()))
-    matches = re.findall(pattern, clean_text, re.IGNORECASE)
-    
     answer_dict = {}
-    for match in matches:
-        category = category_map[match[0].upper()]
-        answer = "YES" if match[1].upper() in ("Y", "YES") else "NO" if match[1].upper() in ("N", "NO") else "MAYBE"
-        answer_dict[category] = answer
+    for category in expected_order:
+        patterns = [
+            rf"{category}[\s:]*\[?(YES|NO|MAYBE|Y|N|M)\]?",
+            rf"{category.replace('_', ' ')}[\s:]*\[?(YES|NO|MAYBE|Y|N|M)\]?"
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, raw_answer, re.IGNORECASE)
+            if match:
+                raw_result = match.group(1).upper()
+                answer = "YES" if raw_result in ("Y", "YES") else "NO" if raw_result in ("N", "NO") else "MAYBE"
+                answer_dict[category] = answer
+                break
+        else:
+            answer_dict[category] = "NO"
     
-    return [answer_dict.get(cat, "NO") for cat in expected_order]
+    return [answer_dict[cat] for cat in expected_order]
 
 def analyze_script(script):
-    print("\n=== Starting Analysis ===")
+    logger.info("Starting Analysis")
     start_time = time.time()
     
     try:
-        # Model configuration
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
         model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
         
-        # Optimized chunking for 2k context window
-        max_chunk_size = 1024  # Leaves 1000 tokens for response
-        overlap = 128
-        chunks = [script[i:i+max_chunk_size] for i in range(0, len(script), max_chunk_size - overlap)]
+        max_chunk_size = 2048  # Increased chunk size
+        chunks = [script[i:i+max_chunk_size] for i in range(0, len(script), max_chunk_size)]
         
         expected_order = [
-            "VIOLENCE", "DEATH", "SUBSTANCE_USE", "GORE", "VOMIT",
-            "SEXUAL_CONTENT", "SEXUAL_ABUSE", "SELF_HARM",
-            "GUN_USE", "ANIMAL_CRUELTY", "MENTAL_HEALTH"
+            "VIOLENCE", "DEATH", "SUBSTANCE_USE", "GORE", 
+            "VOMIT", "SEXUAL_CONTENT", "SEXUAL_ABUSE", 
+            "SELF_HARM", "GUN_USE", "ANIMAL_CRUELTY", "MENTAL_HEALTH"
         ]
         
         identified = {cat: 0 for cat in expected_order}
         
         for chunk_idx, chunk in enumerate(chunks, 1):
-            chunk_start = time.time()
-            print(f"\nProcessing chunk {chunk_idx}/{len(chunks)}")
-            print("=" * 50)
+            logger.info(f"Processing chunk {chunk_idx}/{len(chunks)}")
             
-            # Optimized prompt with response space
-            prompt = f"""TEXT ANALYSIS:
-Respond ONLY with this exact format:
+            prompt = f"""Comprehensive Sensitive Content Analysis Protocol
 
-VIOLENCE: [YES/NO]
-DEATH: [YES/NO]
-SUBSTANCE_USE: [YES/NO]
-GORE: [YES/NO]
-VOMIT: [YES/NO]
-SEXUAL_CONTENT: [YES/NO]
-SEXUAL_ABUSE: [YES/NO]
-SELF_HARM: [YES/NO]
-GUN_USE: [YES/NO]
-ANIMAL_CRUELTY: [YES/NO]
-MENTAL_HEALTH: [YES/NO]
+You are a highly specialized content analysis AI. Your task is to meticulously examine the provided text for potentially sensitive or harmful content. Perform an exhaustive, multi-layered analysis with extreme precision.
 
-Text: {chunk[:768]}..."""  # Reduced text preview
+ANALYSIS DIRECTIVES:
+1. Thoroughly scan the entire text
+2. Provide detailed rationale for each classification
+3. Flag ANY potential indicators of sensitive content
+4. Be extremely conservative in your assessments
+
+CONTENT CATEGORIES FOR DETAILED EXAMINATION:
+
+VIOLENCE: 
+- Comprehensive assessment of physical aggression
+- Includes: fighting, torture, physical confrontations
+- Evaluate intensity, graphic nature, psychological impact
+- Detailed description of violent elements
+
+DEATH: 
+- Comprehensive analysis of fatal incidents
+- Includes: killing descriptions, death circumstances
+- Assess psychological and emotional context
+- Evaluate graphic or traumatic elements
+
+SUBSTANCE_USE:
+- Detailed examination of drug/alcohol references
+- Include: misuse, addiction patterns, context
+- Assess severity and potential psychological implications
+
+GORE:
+- Thorough investigation of graphic bodily descriptions
+- Includes: blood, injury, extreme physical trauma
+- Evaluate graphical intensity and psychological impact
+
+VOMIT:
+- Detailed analysis of bodily fluid descriptions
+- Assess context, intensity, psychological implications
+
+SEXUAL_CONTENT:
+- Comprehensive sexual activity assessment
+- Evaluate explicit vs. implied content
+- Analyze psychological and contextual elements
+
+SEXUAL_ABUSE:
+- Rigorous examination of non-consensual sexual acts
+- Detailed assessment of power dynamics
+- Psychological impact analysis
+
+SELF_HARM:
+- Thorough investigation of suicide/self-injury references
+- Comprehensive psychological risk assessment
+- Evaluate implicit and explicit indicators
+
+GUN_USE:
+- Detailed firearms and gun violence analysis
+- Assess context, threat level, psychological impact
+
+ANIMAL_CRUELTY:
+- Comprehensive animal harm investigation
+- Evaluate physical and psychological dimensions
+
+MENTAL_HEALTH:
+- Extensive psychological distress examination
+- Detailed analysis of emotional and mental states
+- Assess severity and potential risk indicators
+
+ANALYSIS TEXT:
+{chunk}
+
+RESPONSE FORMAT:
+For each category, provide:
+1. YES/NO classification
+2. Brief substantive explanation
+3. Confidence level (low/medium/high)"""
 
             inputs = tokenizer(prompt, return_tensors="pt", 
-                             truncation=True, 
-                             max_length=1536,  # Leaves 512 tokens for response
-                             padding_side="left").to(model.device)
+                               truncation=True, 
+                               max_length=4096).to(model.device)
             
-            # Generation with controlled output
             outputs = model.generate(
                 **inputs,
                 do_sample=True,
                 temperature=0.2,
                 top_p=0.9,
-                repetition_penalty=1.05,
+                max_new_tokens=1024,  # Increased tokens
+                num_return_sequences=1,
                 pad_token_id=tokenizer.eos_token_id
             )
             
-            # Full response decoding
-            full_response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            input_length = inputs.input_ids.size(1)
+            generated_tokens = outputs[0][input_length:]
+            raw_answer = tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
             
-            # Clean response extraction
-            response_start = full_response.find("Text:") + len("Text:")
-            raw_answer = full_response[response_start:].split("...")[-1].strip()
+            logger.info("[Model Raw Response]")
+            logger.info(raw_answer)
             
-            print("\n[Model Raw Response]")
-            print("-" * 50)
-            print(raw_answer)
-            print("-" * 50)
-            
-            # Parse and display
             answers = extract_answers(raw_answer, expected_order)
             
-            print("\n[Analysis Results]")
-            print("Category          | Status")
-            print("------------------|-------")
+            logger.info("[Analysis Results]")
             for cat, ans in zip(expected_order, answers):
-                print(f"{cat:<17}| {ans}")
+                logger.info(f"{cat}: {ans}")
                 if ans == "YES":
                     identified[cat] += 1
-            
-            print(f"\nChunk processed in {time.time()-chunk_start:.1f}s")
         
-        # Final results
-        print("\n\n=== Final Results ===")
-        print("Category          | Confidence")
-        print("------------------|-----------")
+        logger.info("\n=== Final Results ===")
         for cat in expected_order:
             score = identified[cat]
             status = "CONFIRMED" if score > 0 else "NOT FOUND"
-            print(f"{cat:<17}| {status} ({score}/{len(chunks)} chunks)")
+            logger.info(f"{cat}: {status} ({score}/{len(chunks)} chunks)")
         
-        print(f"\nTotal analysis time: {time.time()-start_time:.1f}s")
+        total_time = time.time() - start_time
+        logger.info(f"Total analysis time: {total_time:.1f}s")
         return identified
     
     except Exception as e:
-        print(f"\nError: {str(e)}")
+        logger.error(f"Analysis error: {e}")
         return {"error": str(e)}
 
 def get_detailed_analysis(script):
